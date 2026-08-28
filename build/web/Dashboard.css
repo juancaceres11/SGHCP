@@ -1,0 +1,116 @@
+
+body{
+font-family:Arial, Helvetica, sans-serif;
+background-color: #eaf7f6;
+text-align: center;
+height:100vh;
+}
+   /* titulo dentro del div*/
+h1{
+color:#eaf7f6;
+}
+
+/* 1. Estilos del menú lateral */
+nav {
+  position: fixed;       /* Lo fija en la pantalla al hacer scroll */
+  top: 0;                /* Lo pega al borde superior */
+  left: 0;               /* Lo pega al borde izquierdo */
+  width: 200px;          /* Ancho fijo lateral */
+  height: 100vh;         /* Ocupa el 100% de la altura vertical visible */
+  background-color: #008b8b;   /* Color de fondo */
+  padding-top: 20px;     /* Espacio superior interno */
+  font-size: 70%;        /* tamaño del titulo*/
+  text-align: center;     
+}
+
+/* 1. EL CONTENEDOR: Controla la posición de los botones */
+.contenedor-botones {
+  display: flex;
+  flex-direction: column;   /* Alinea los botones de arriba a abajo */
+  height: 100%;             /* IMPORTANTE: Debe medir el 100% de la altura del menú */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+
+/* 2. LOS BOTONES: Controlan su propio aspecto visual */
+.contenedor-botones button {
+  height: 60px;             /* Tamaño de los botones del menú */
+  border-radius: 15px;    
+  padding: 10px;            
+  margin-bottom: 25px;      /* Separa los botones entre sí */
+  display: flex;
+  justify-content: center; 
+  align-items: center;    
+  font-weight: bold;        /* Hace la letra negrita */
+  color: #000000;   
+}
+.contenedor-botones button:hover{
+background-color: #34b4de;
+cursor:pointer;
+}
+.Cerrar{
+margin-top: 160px;
+background-color:white;
+color: black;
+}
+
+form{
+    margin-left: 60%;
+    text-align: center;
+}
+#campo-busqueda {
+padding:10px 20px;
+font-size: 16px;
+border-radius: 8px;
+background-color: #5a9e9e;
+
+}
+form button{
+padding: 10px 20px;
+font-size: 16px;
+background-color: #008b8b;
+color: white;
+border-radius: 8px;
+cursor: pointer;
+transition: background 0.3s;
+}
+form button:hover{
+background-color:#34b4de;
+cursor: pointer;
+}
+
+.contenido-principal{     /*titulo del contenido principal*/
+    color:#008b8b ;
+    top: auto;
+    margin-right:40%;
+    font-size:150%;
+}
+table{              /* aquí empieza el contenido de la tabla en general*/
+width: 107%;
+border-collapse: collapse;
+margin-top:30px;
+font-family: Arial, Helvetica, sans-serif;
+font-size: 15px;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Sombra suave para darle relieve */
+border-radius: 8px;
+overflow: hidden;
+}
+
+thead tr{
+  background-color:#008b8b;  
+  color: #ffffff;              
+  text-align:center;            
+  font-weight:bold;
+}
+
+th, td {
+  padding: 12px 15px;           /* Espacio entre los datos y la tabla en general*/
+}
+tbody tr {                      /*linea divisoria entre cada dato*/
+  border-bottom: 1px solid #dddddd;
+}
+tbody tr:hover {
+  background-color: #34b4de;    /* Se ilumina  al poner el mouse encima */
+  cursor: pointer;
+}
