@@ -1,0 +1,146 @@
+/* Estilo general */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #ffffff;
+  margin: 0;
+  height: 100vh;
+}
+
+/* Encabezado principal del menú lateral */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 100vh;
+  background-color: #008b8b;
+  padding-top: 20px;
+  font-size: 70%;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+nav h1 {
+  color: #eaf7f6;
+  font-size: 16px;
+  margin-bottom: 30px;
+}
+
+/* Botones del menú lateral */
+.contenedor-botones {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 80px);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.contenedor-botones button {
+  height: 50px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  color: #000000;
+  border: none;
+}
+
+.contenedor-botones button:hover {
+  background-color: #34b4de;
+  cursor: pointer;
+}
+
+.Cerrar {
+  margin-top: auto;
+  background-color: white;
+  color: black;
+}
+
+/* Contenido principal */
+.contenido-principal {
+  margin-left: 220px; /* espacio para que no se tape con el menú */
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+.contenido-principal h1 {
+  color: #008b8b;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 24px;
+}
+
+/* Formulario */
+.formulario-registro {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  max-width: 700px;
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  text-align: left;
+  margin: 0 auto; /* centra horizontalmente */
+}
+
+/* Contenedor de cada campo */
+.grupo-campo {
+  display: flex;
+  flex-direction: column;
+}
+
+.fila-completa {
+  grid-column: span 2;
+}
+
+/* Etiquetas */
+.grupo-campo label {
+  font-weight: bold;
+  color: #000000;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+/* Inputs */
+.grupo-campo input[type="text"],
+.grupo-campo input[type="number"],
+.grupo-campo input[type="tel"],
+.grupo-campo input[type="date"],
+.grupo-campo select {
+  padding: 10px;
+  border: 1px solid #cccccc;
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.grupo-campo input[type="file"] {
+  padding: 5px 0;
+}
+
+.grupo-campo input:focus,
+.grupo-campo select:focus {
+  border-color: #008b8b;
+  box-shadow: 0 0 5px rgba(0, 139, 139, 0.3);
+}
+
+/* Botón guardar */
+.guardar {
+  grid-column: span 2;
+  padding: 15px;
+  background-color: #008b8b;
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: background-color 0.3s;
+}
+
+.guardar:hover {
+  background-color: #34b4de;
+}
