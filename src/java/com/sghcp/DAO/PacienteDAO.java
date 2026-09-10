@@ -1,7 +1,7 @@
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+*EL DAO RECIBE LOS PARAMETROS DESDE EL SERVLET Y EJECUTA EL INSERT EN LA TABLA PACIENTE DE NUESTRA BD.*/
 package com.sghcp.DAO;
 
 import com.sghcp.config.ConexionBD;

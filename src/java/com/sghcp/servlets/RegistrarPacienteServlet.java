@@ -10,6 +10,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
 
+
 @WebServlet("/RegistrarPacienteServlet")
 public class RegistrarPacienteServlet extends HttpServlet {
     @Override
@@ -26,16 +27,19 @@ public class RegistrarPacienteServlet extends HttpServlet {
         String Telefono = request.getParameter("Telefono");
         String Ocupacion = request.getParameter ("Ocupacion");
         int Id_clinica = 1; // por ahora sería 1 mientras vamos agregando las otras tablas de la base de datos y completamos el SGHCP.
-
+    
+     
+  
         PacienteDAO dao = new PacienteDAO();
-        boolean registrado = dao.registrarPaciente(Nombre, Apellidos, Identificacion,
-                                                   Sexo, Tipo_Sangre, Fecha_Nacimiento,
-                                                   Direccion, Telefono, Ocupacion,Id_clinica);
+        boolean exito = dao.registrarPaciente(Nombre, Apellidos, Identificacion,
+                Sexo, Tipo_Sangre, Fecha_Nacimiento,
+                Direccion, Telefono, Ocupacion, Id_clinica);
 
-        if (registrado) {
-            response.sendRedirect("dashboard.jsp?msg=Paciente registrado");
+        if (exito) {
+            response.sendRedirect("RegistrarPaciente.jsp?msg=Paciente registrado correctamente");
         } else {
-            response.sendRedirect("RegistrarPaciente.jsp?error=1");
+            response.sendRedirect("RegistrarPaciente.jsp?msg=Error: Identificacion  ya registrada");
         }
     }
 }
+            

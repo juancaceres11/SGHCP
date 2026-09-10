@@ -24,6 +24,25 @@
                                     <!-- Contenido principal -->
   <div class="contenido-principal">
     <h1>Registrar paciente</h1>
+<body>
+    <% //codigo agregado para que nos arroje el mensaje si se repite el mismo numero de identificacion
+        String msg = request.getParameter("msg");
+        if (msg != null) { 
+    %>
+        <div style="background-color:<%= msg.contains("correctamente") ? "#d4edda" : "#f8d7da" %>;
+                    color:<%= msg.contains("correctamente") ? "#155724" : "#721c24" %>;
+                    padding:10px; border-radius:5px; margin-bottom:15px; text-align:center;">
+            <%= msg %>
+        </div>
+    <% 
+        } 
+    %>
+
+    
+    <form action="RegistrarPacienteServlet" method="post">
+        <!-- campos del formulario -->
+    </form>
+</body>
 
     <!-- Formulario -->
     <form class="formulario-registro" action="RegistrarPacienteServlet" method="post">

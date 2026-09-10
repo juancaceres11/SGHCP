@@ -35,12 +35,12 @@ public class LoginServlet extends HttpServlet {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                // Si existe el especialista → crear sesión y redirigir
+                // Si existe el especialista - crear sesión y redirigir
                 HttpSession sesion = request.getSession();
                 sesion.setAttribute("correo", correo);
                 response.sendRedirect("dashboard.jsp");
             } else {
-                // Si no existe → regresar al login con error
+                // Si no existe - regresar al login con error
                 response.sendRedirect("login.jsp?error=1");
             }
 
