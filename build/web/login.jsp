@@ -1,15 +1,18 @@
+response.sendRedirect("http://localhost:5173/");
 <%-- 
     Document   : login
-    Created on : 26/08/2026, 2:46:26â€¯p.Â m.
+    Created on : 26/08/2026, 2:46:26?p. m.
     Author     : Admin
---%>
+
+
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGHCP - Inicio de SesiÃ³n</title>
+    <title>SGHCP - Inicio de Sesión</title>
     <link rel="stylesheet" href="inicio_sesion.css">
 </head>
 <body>
@@ -20,9 +23,9 @@
             <!-- Formulario apunta al servlet -->
             <form action="LoginServlet" method="post">
                 <input type="email" id="correo" name="Correo" placeholder="Ingrese su correo" required>
-                <input type="password" id="tarjeta" name="Tarjeta_Profesional" placeholder="Ingrese su contraseÃ±a" required>
+                <input type="password" id="tarjeta" name="Tarjeta_Profesional" placeholder="Ingrese su contraseña" required>
 
-                <a href="#" class="forgot">Â¿Olvidaste tu contraseÃ±a?</a>
+                <a href="#" class="forgot">¿Olvidaste tu contraseña?</a>
                 <button type="submit">Ingresar</button>
             </form>
 
@@ -31,7 +34,7 @@
                 String error = request.getParameter("error");
                 if (error != null && error.equals("1")) {
             %>
-                <p style="color:red; text-align:center;">Credenciales invÃ¡lidas. Intente nuevamente.</p>
+                <p style="color:red; text-align:center;">Credenciales inválidas. Intente nuevamente.</p>
             <%
                 }
             %>
@@ -40,3 +43,7 @@
     <script src="inicio_sesion.js"></script>
 </body>
 </html>
+Este código ya queda relegado y sin funcion para el módulo inicio de sesión que pasa a manejarse mediante la carpeta de react.
+manejando el front-end del modulo independiente
+--%>  
+ 

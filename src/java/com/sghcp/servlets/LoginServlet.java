@@ -2,13 +2,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
+
+// codigo modificado para trabajar el modulo de login con react para responder JSON.
 package com.sghcp.servlets;
 
-import com.sghcp.config.ConexionBD;
+import com.sghcp.DAO.especialistaDAO;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
@@ -20,32 +20,42 @@ public class LoginServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Recibir los datos del formulario
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        // CORS - necesario mientras React corre en su propio servidor de desarrollo
+        response.setHeader("Access-Control-Allow-Origin", "http://localhost:5173"); // puerto por defecto de Vite
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+
         String correo = request.getParameter("Correo");
         String tarjetaProfesional = request.getParameter("Tarjeta_Profesional");
 
-        try (Connection conn = ConexionBD.getConexion()) {
-            // Consulta a la tabla especialista
-            PreparedStatement ps = conn.prepareStatement(
-                "SELECT * FROM especialista WHERE Correo=? AND Tarjeta_Profesional=?"
-            );
-            ps.setString(1, correo);
-            ps.setString(2, tarjetaProfesional);
+        especialistaDAO dao = new especialistaDAO();
+        boolean valido = dao.validarLogin(correo, tarjetaProfesional);
 
-            ResultSet rs = ps.executeQuery();
+        PrintWriter out = response.getWriter();
 
-            if (rs.next()) {
-                // Si existe el especialista - crear sesión y redirigir
-                HttpSession sesion = request.getSession();
-                sesion.setAttribute("correo", correo);
-                response.sendRedirect("dashboard.jsp");
-            } else {
-                // Si no existe - regresar al login con error
-                response.sendRedirect("login.jsp?error=1");
-            }
+        if (valido) {
+            HttpSession sesion = request.getSession();
+            sesion.setAttribute("correo", correo);
 
-        } catch (Exception e) {
-            throw new ServletException("Error en el proceso de login", e);
+            out.print("{ \"success\": true, \"correo\": \"" + correo + "\" }");
+        } else {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            out.print("{ \"success\": false, \"mensaje\": \"usuario o contraseña incorrectos\" }");
         }
+        out.flush();
+    }
+
+    // Necesario para que el navegador no bloquee la petición (preflight CORS)
+    @Override
+    protected void doOptions(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+        response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 }

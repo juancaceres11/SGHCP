@@ -1,3 +1,5 @@
+/*lo dejamos sin efecto alguno ya que estaba sujeto al login.jsp pero como ya se maneja los eventos mediante react donde
+tambien se cargó el css, ya no es necesario, lo dejaremos por ahora pero si se migra todos los modulos a react puede eliminarse.*/
 
 body {
     font-family: Arial, Helvetica, sans-serif;
@@ -8,7 +10,7 @@ body {
     align-items: center;
     height: 100vh;
 }
-
+ 
 /* Contenedor principal */
 .login-container {
     display: flex;

@@ -1,6 +1,4 @@
-/*lo dejamos sin efecto alguno ya que estaba sujeto al login.jsp pero como ya se maneja los eventos mediante react donde
-tambien se cargó el css, ya no es necesario, lo dejaremos por ahora pero si se migra todos los modulos a react puede eliminarse.*/
-
+ 
 body {
     font-family: Arial, Helvetica, sans-serif;
     background-color: #eaf7f6;
@@ -10,8 +8,7 @@ body {
     align-items: center;
     height: 100vh;
 }
- 
-/* Contenedor principal */
+
 .login-container {
     display: flex;
     justify-content: center;
@@ -19,7 +16,6 @@ body {
     width: 100%;
 }
 
-/* Caja de login */
 .login-box {
     background-color: #ffffff;
     padding: 40px;
@@ -29,13 +25,11 @@ body {
     text-align: center;
 }
 
-/* Título */
 .login-box h1 {
-    color: #008b8b; /* turquesa fuerte */
+    color: #008b8b;
     margin-bottom: 20px;
 }
 
-/* Inputs */
 .login-box input {
     width: 100%;
     padding: 12px;
@@ -50,7 +44,6 @@ body {
     border: 1px solid #008b8b;
 }
 
-/* Botón */
 .login-box button {
     width: 100%;
     padding: 12px;
@@ -61,14 +54,12 @@ body {
     font-size: 16px;
     cursor: pointer;
     margin-top: 15px;
-    
 }
 
 .login-box button:hover {
   background-color:#34b4de;      
 }
 
-/* Link */
 .forgot {
     display: block;
     margin-top: 10px;

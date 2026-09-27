@@ -5,6 +5,17 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="javax.servlet.http.HttpSession" %>
+<%
+HttpSession sesion = request.getSession(false);
+String correo = (sesion != null) ? (String) sesion.getAttribute("correo") : null;
+    if (correo == null) {
+        response.sendRedirect("http://localhost:5173/");
+        return;
+    }
+    response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    response.setHeader("Pragma", "no-cache");
+    response.setDateHeader("Expires", 0);
+%>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -14,35 +25,25 @@
     <link rel="stylesheet" href="Dashboard.css">
 </head>
 <body>
-<%
-    HttpSession sesion = request.getSession(false);
-    String correo = (sesion != null) ? (String) sesion.getAttribute("correo") : null;
-    if (correo == null) {
-        response.sendRedirect("login.jsp");
-    }
-%>
 
 <!-- Menú lateral -->
 <nav class="menu lateral">
     <h1>SGHC - PODOLOGICAS</h1>
- <div class="contenedor-botones">
-    <button class="btn Dashboard">Dashboard</button>
-    <button class="btn Registrar">Registrar paciente</button>
-    <button class="btn Cerrar">Cerrar sesión</button>
-</div>
-
+    <div class="contenedor-botones">
+        <button class="btn Dashboard">Dashboard</button>
+        <button class="btn Registrar">Registrar paciente</button>
+        <button class="btn Cerrar">Cerrar sesión</button>
+    </div>
 </nav>
 
 <h1 class="contenido-principal">Pacientes Registrados</h1>
 
 <form>
-    <!-- Panel de búsqueda -->
     <label for="campo-busqueda"></label>
     <input type="search" id="campo-busqueda" name="q" placeholder="Buscar pacientes" required>
     <button type="submit">Buscar</button>
 </form>
 
-<!-- Tabla principal -->
 <table>
     <thead>
         <tr>

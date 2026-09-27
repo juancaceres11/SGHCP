@@ -1,3 +1,8 @@
+window.addEventListener("pageshow", function (event) {
+  if (event.persisted) {
+    window.location.reload();
+  }
+});//Ayuda a recargar la pagina, el JSP vuelve a ejecutar la validación de sesión, y si se cerró sesión,nos manda al login correctamente.
 document.addEventListener("DOMContentLoaded", () => {
   // Seleccionamos los botones
   const btnDashboard = document.querySelector(".Dashboard");
@@ -11,11 +16,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Acción al hacer clic en "Registrar paciente"
   btnRegistrar.addEventListener("click", () => {
-    window.location.href = "RegistrarPaciente.jsp"; // asegúrate de crear este JSP
+    window.location.href = "RegistrarPaciente.jsp"; 
   });
 
   // Acción al hacer clic en "Cerrar sesión"
   btnCerrar.addEventListener("click", () => {
-    window.location.href = "login.jsp"; // vuelve al inicio de sesión
-  });
+  window.location.href = "LogoutServlet"; // ahora se destruye la sesión real
+});
 });
