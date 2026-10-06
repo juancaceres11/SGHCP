@@ -7,7 +7,6 @@ String correo = (sesion != null) ? (String) sesion.getAttribute("correo") : null
         response.sendRedirect("http://localhost:5173/");
         return;
     }
-
     // Evitar que el navegador cachee esta página
     response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     response.setHeader("Pragma", "no-cache");
@@ -131,6 +130,7 @@ String correo = (sesion != null) ? (String) sesion.getAttribute("correo") : null
         </form>
     </div>
 
-    <script src="registrar paciente.js"></script>   // se redirige a el documento JavaScript ya que este módulo aun no se ha trabajado con REACT
+    <script src="registrar paciente.js"></script>   <!--se redirige a el documento JavaScript ya que este módulo aun 
+    no se ha trabajado con REACT-->
 </body>
 </html>
