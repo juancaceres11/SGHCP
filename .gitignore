@@ -1,1 +1,4 @@
-build/dist/sghcp-login-react/node_modules/sghcp-login-react/dist/
+build/
+dist/
+sghcp-login-react/node_modules/
+sghcp-login-react/dist/
