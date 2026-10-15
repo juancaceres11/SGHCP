@@ -1,5 +1,6 @@
 package com.sghcp.controlador;
 
+import com.sghcp.config.Permisos;
 import com.sghcp.dao.PacienteDAO;
 import com.sghcp.modelo.Paciente;
 import jakarta.servlet.http.HttpSession;
@@ -14,13 +15,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Servicios web de pacientes: listar y buscar (Dashboard), consultar uno (Perfil)
- * y registrar. Todos exigen que el especialista haya iniciado sesión.
+ * Servicios web de pacientes: listar y buscar (Dashboard), consultar uno (Perfil),
+ * registrar y actualizar. Solo pueden usarlos el especialista y el auxiliar
+ * administrativo; el administrador del sistema no accede a datos de pacientes.
  */
 @RestController
 @RequestMapping("/api/pacientes")
@@ -42,8 +45,9 @@ public class PacienteController {
             @RequestParam(value = "q", defaultValue = "") String q,
             HttpSession sesion) {
 
-        if (!hayLogin(sesion)) {
-            return noAutorizado();
+        ResponseEntity<?> acceso = verificarAcceso(sesion);
+        if (acceso != null) {
+            return acceso;
         }
         try {
             return ResponseEntity.ok(pacienteDAO.listar(q.trim()));
@@ -56,8 +60,9 @@ public class PacienteController {
     @GetMapping("/{id}")
     public ResponseEntity<?> obtener(@PathVariable int id, HttpSession sesion) {
 
-        if (!hayLogin(sesion)) {
-            return noAutorizado();
+        ResponseEntity<?> acceso = verificarAcceso(sesion);
+        if (acceso != null) {
+            return acceso;
         }
         try {
             Paciente paciente = pacienteDAO.buscarPorId(id);
@@ -71,7 +76,7 @@ public class PacienteController {
         }
     }
 
-    /** POST /api/pacientes — registra un paciente nuevo. */
+    /** POST /api/pacientes — registra un paciente nuevo y anota quién lo registró. */
     @PostMapping
     public ResponseEntity<?> registrar(
             @RequestParam(value = "Nombre", required = false) String nombre,
@@ -85,52 +90,35 @@ public class PacienteController {
             @RequestParam(value = "Direccion", required = false) String direccion,
             HttpSession sesion) {
 
-        if (!hayLogin(sesion)) {
-            return noAutorizado();
+        ResponseEntity<?> acceso = verificarAcceso(sesion);
+        if (acceso != null) {
+            return acceso;
         }
 
-        // Validación 1: campos obligatorios
-        if (vacio(nombre) || vacio(apellidos) || vacio(fechaNacimiento)
-                || vacio(tipoSangre) || vacio(identificacion) || vacio(sexo)) {
+        // Validación: la identificación es obligatoria al registrar
+        if (vacio(identificacion)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(respuesta(false, "Todos los campos obligatorios deben estar completos"));
         }
-        // Validación 2: valores permitidos
-        if (!SEXOS.contains(sexo)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(respuesta(false, "El sexo debe ser M o F"));
-        }
-        if (!TIPOS_SANGRE.contains(tipoSangre)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(respuesta(false, "Tipo de sangre no válido"));
-        }
-        // Validación 3: la fecha debe tener formato AAAA-MM-DD
-        try {
-            LocalDate.parse(fechaNacimiento);
-        } catch (DateTimeParseException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(respuesta(false, "La fecha de nacimiento debe tener formato AAAA-MM-DD"));
+        // Validación: obligatorios, valores permitidos y formato de fecha
+        String error = validarDatos(nombre, apellidos, fechaNacimiento, tipoSangre, sexo);
+        if (error != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(respuesta(false, error));
         }
 
         try {
-            // Validación 4: la identificación no puede estar repetida
+            // Validación: la identificación no puede estar repetida
             if (pacienteDAO.existeIdentificacion(identificacion)) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(respuesta(false, "Ya existe un paciente con esa identificación"));
             }
 
-            Paciente nuevo = new Paciente();
-            nuevo.setNombre(nombre);
-            nuevo.setApellidos(apellidos);
-            nuevo.setFechaNacimiento(fechaNacimiento);
-            nuevo.setTipoSangre(tipoSangre);
+            Paciente nuevo = armarPaciente(nombre, apellidos, fechaNacimiento, tipoSangre,
+                    telefono, sexo, ocupacion, direccion);
             nuevo.setIdentificacion(identificacion);
-            nuevo.setTelefono(telefono);
-            nuevo.setSexo(sexo);
-            nuevo.setOcupacion(ocupacion);
-            nuevo.setDireccion(direccion);
 
-            int idNuevo = pacienteDAO.registrar(nuevo);
+            // Se envía el rol y el id de quien registra, para llenar "registro_paciente"
+            int idNuevo = pacienteDAO.registrar(nuevo, Permisos.rol(sesion), Permisos.idUsuario(sesion));
             if (idNuevo > 0) {
                 Map<String, Object> cuerpo = respuesta(true, "Paciente registrado correctamente");
                 cuerpo.put("id", idNuevo);
@@ -144,16 +132,102 @@ public class PacienteController {
         }
     }
 
-    // ---- Métodos de apoyo ----
+    /** PUT /api/pacientes/{id} — actualiza los datos del paciente (la identificación no cambia). */
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizar(
+            @PathVariable int id,
+            @RequestParam(value = "Nombre", required = false) String nombre,
+            @RequestParam(value = "Apellidos", required = false) String apellidos,
+            @RequestParam(value = "Fecha_Nacimiento", required = false) String fechaNacimiento,
+            @RequestParam(value = "Tipo_Sangre", required = false) String tipoSangre,
+            @RequestParam(value = "Telefono", required = false) String telefono,
+            @RequestParam(value = "Sexo", required = false) String sexo,
+            @RequestParam(value = "Ocupacion", required = false) String ocupacion,
+            @RequestParam(value = "Direccion", required = false) String direccion,
+            HttpSession sesion) {
 
-    /** Hay login si el controlador de acceso dejó el id del especialista en la sesión. */
-    private boolean hayLogin(HttpSession sesion) {
-        return sesion.getAttribute("idEspecialista") != null;
+        ResponseEntity<?> acceso = verificarAcceso(sesion);
+        if (acceso != null) {
+            return acceso;
+        }
+
+        String error = validarDatos(nombre, apellidos, fechaNacimiento, tipoSangre, sexo);
+        if (error != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(respuesta(false, error));
+        }
+
+        try {
+            if (pacienteDAO.buscarPorId(id) == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(respuesta(false, "Paciente no encontrado"));
+            }
+
+            Paciente datos = armarPaciente(nombre, apellidos, fechaNacimiento, tipoSangre,
+                    telefono, sexo, ocupacion, direccion);
+
+            if (pacienteDAO.actualizar(id, datos)) {
+                return ResponseEntity.ok(respuesta(true, "Datos del paciente actualizados correctamente"));
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(respuesta(false, "No se pudo actualizar el paciente"));
+
+        } catch (SQLException e) {
+            return errorInterno("actualizar paciente", e);
+        }
     }
 
-    private ResponseEntity<Map<String, Object>> noAutorizado() {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(respuesta(false, "Debe iniciar sesión"));
+    // ---- Métodos de apoyo ----
+
+    /**
+     * Control de acceso: devuelve null si el usuario puede continuar,
+     * 401 si no hay sesión y 403 si su rol no tiene permiso sobre pacientes.
+     */
+    private ResponseEntity<Map<String, Object>> verificarAcceso(HttpSession sesion) {
+        if (!Permisos.hayLogin(sesion)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(respuesta(false, "Debe iniciar sesión"));
+        }
+        if (!Permisos.tieneRol(sesion, Permisos.ESPECIALISTA, Permisos.AUXILIAR)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(respuesta(false, "No tiene permisos para esta acción"));
+        }
+        return null;
+    }
+
+    /** Valida los datos comunes del paciente. Devuelve el mensaje de error, o null si todo está bien. */
+    private String validarDatos(String nombre, String apellidos, String fechaNacimiento,
+                                String tipoSangre, String sexo) {
+        if (vacio(nombre) || vacio(apellidos) || vacio(fechaNacimiento)
+                || vacio(tipoSangre) || vacio(sexo)) {
+            return "Todos los campos obligatorios deben estar completos";
+        }
+        if (!SEXOS.contains(sexo)) {
+            return "El sexo debe ser M o F";
+        }
+        if (!TIPOS_SANGRE.contains(tipoSangre)) {
+            return "Tipo de sangre no válido";
+        }
+        try {
+            LocalDate.parse(fechaNacimiento);
+        } catch (DateTimeParseException e) {
+            return "La fecha de nacimiento debe tener formato AAAA-MM-DD";
+        }
+        return null;
+    }
+
+    private Paciente armarPaciente(String nombre, String apellidos, String fechaNacimiento,
+                                   String tipoSangre, String telefono, String sexo,
+                                   String ocupacion, String direccion) {
+        Paciente p = new Paciente();
+        p.setNombre(nombre);
+        p.setApellidos(apellidos);
+        p.setFechaNacimiento(fechaNacimiento);
+        p.setTipoSangre(tipoSangre);
+        p.setTelefono(telefono);
+        p.setSexo(sexo);
+        p.setOcupacion(ocupacion);
+        p.setDireccion(direccion);
+        return p;
     }
 
     private ResponseEntity<Map<String, Object>> errorInterno(String accion, SQLException e) {

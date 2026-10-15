@@ -8,13 +8,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Repository;
 
-/** Acceso a datos de la tabla "paciente". */
+/** Acceso a datos de la tabla "paciente" (y de "registro_paciente" al registrar). */
 @Repository
 public class PacienteDAO {
 
@@ -104,32 +105,86 @@ public class PacienteDAO {
         }
     }
 
-    /** Inserta un paciente nuevo. Devuelve el id generado, o -1 si no se pudo guardar. */
-    public int registrar(Paciente p) throws SQLException {
-        String sql = "INSERT INTO paciente "
+    /**
+     * Inserta un paciente nuevo y deja constancia de quién lo registró en "registro_paciente".
+     * Las dos inserciones van en una transacción: si una falla, no se guarda ninguna.
+     * Devuelve el id generado, o -1 si no se pudo guardar.
+     */
+    public int registrar(Paciente p, String rol, int idUsuario) throws SQLException {
+        String sqlPaciente = "INSERT INTO paciente "
                    + "(Nombre, Apellidos, Identificacion, Sexo, Tipo_Sangre, Fecha_Nacimiento, "
                    + "Direccion, Telefono, Id_Clinica, Ocupacion) "
                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = conexionBD.getConexion();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, p.getNombre());
-            ps.setString(2, p.getApellidos());
-            ps.setString(3, p.getIdentificacion());
-            ps.setString(4, p.getSexo());
-            ps.setString(5, p.getTipoSangre());
-            ps.setDate(6, Date.valueOf(p.getFechaNacimiento()));
-            ps.setString(7, p.getDireccion());
-            ps.setString(8, p.getTelefono());
-            ps.setInt(9, ID_CLINICA_FIJO);
-            ps.setString(10, p.getOcupacion());
-            ps.executeUpdate();
+        String sqlRegistro = "INSERT INTO registro_paciente "
+                   + "(Fecha_Registro, Id_Paciente, Id_Aux_Administrativo, Id_Especialista) "
+                   + "VALUES (NOW(), ?, ?, ?)";
 
-            try (ResultSet claves = ps.getGeneratedKeys()) {
-                if (claves.next()) {
-                    return claves.getInt(1);
+        try (Connection conn = conexionBD.getConexion()) {
+            conn.setAutoCommit(false);   // inicia la transacción
+            try (PreparedStatement ps = conn.prepareStatement(sqlPaciente, Statement.RETURN_GENERATED_KEYS)) {
+                ps.setString(1, p.getNombre());
+                ps.setString(2, p.getApellidos());
+                ps.setString(3, p.getIdentificacion());
+                ps.setString(4, p.getSexo());
+                ps.setString(5, p.getTipoSangre());
+                ps.setDate(6, Date.valueOf(p.getFechaNacimiento()));
+                ps.setString(7, p.getDireccion());
+                ps.setString(8, p.getTelefono());
+                ps.setInt(9, ID_CLINICA_FIJO);
+                ps.setString(10, p.getOcupacion());
+                ps.executeUpdate();
+
+                int idNuevo = -1;
+                try (ResultSet claves = ps.getGeneratedKeys()) {
+                    if (claves.next()) {
+                        idNuevo = claves.getInt(1);
+                    }
                 }
+                if (idNuevo < 0) {
+                    conn.rollback();
+                    return -1;
+                }
+
+                // Se anota quién registró: auxiliar o especialista (el otro campo queda en NULL)
+                try (PreparedStatement psRegistro = conn.prepareStatement(sqlRegistro)) {
+                    psRegistro.setInt(1, idNuevo);
+                    if ("AUXILIAR".equals(rol)) {
+                        psRegistro.setInt(2, idUsuario);
+                        psRegistro.setNull(3, Types.INTEGER);
+                    } else {
+                        psRegistro.setNull(2, Types.INTEGER);
+                        psRegistro.setInt(3, idUsuario);
+                    }
+                    psRegistro.executeUpdate();
+                }
+
+                conn.commit();   // confirma las dos inserciones
+                return idNuevo;
+
+            } catch (SQLException e) {
+                conn.rollback();   // si algo falla, se deshace todo
+                throw e;
             }
         }
-        return -1;
+    }
+
+    /** Actualiza los datos editables de un paciente. La identificación no se modifica. */
+    public boolean actualizar(int id, Paciente p) throws SQLException {
+        String sql = "UPDATE paciente SET Nombre = ?, Apellidos = ?, Sexo = ?, Tipo_Sangre = ?, "
+                   + "Fecha_Nacimiento = ?, Direccion = ?, Telefono = ?, Ocupacion = ? "
+                   + "WHERE Id_Paciente = ?";
+        try (Connection conn = conexionBD.getConexion();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, p.getNombre());
+            ps.setString(2, p.getApellidos());
+            ps.setString(3, p.getSexo());
+            ps.setString(4, p.getTipoSangre());
+            ps.setDate(5, Date.valueOf(p.getFechaNacimiento()));
+            ps.setString(6, p.getDireccion());
+            ps.setString(7, p.getTelefono());
+            ps.setString(8, p.getOcupacion());
+            ps.setInt(9, id);
+            return ps.executeUpdate() > 0;
+        }
     }
 }
