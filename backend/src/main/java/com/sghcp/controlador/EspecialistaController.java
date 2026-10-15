@@ -28,52 +28,7 @@ public class EspecialistaController {
         this.especialistaDAO = especialistaDAO;
     }
 
-    /** POST /api/login — valida correo y tarjeta profesional y abre la sesión. */
-    @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> iniciarSesion(
-            @RequestParam(value = "Correo", required = false) String correo,
-            @RequestParam(value = "Tarjeta_Profesional", required = false) String tarjetaProfesional,
-            HttpSession sesion) {
-
-        // Validación: ningún dato puede llegar vacío
-        if (estaVacio(correo) || estaVacio(tarjetaProfesional)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(respuesta(false, "Correo y tarjeta profesional son obligatorios"));
-        }
-
-        try {
-            Especialista especialista = especialistaDAO.validarLogin(correo, tarjetaProfesional);
-
-            // Credenciales incorrectas
-            if (especialista == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(respuesta(false, "Error en la autenticación"));
-            }
-
-            // Credenciales correctas: se guarda en la sesión quién inició sesión
-            sesion.setAttribute("idEspecialista", especialista.getIdEspecialista());
-            sesion.setAttribute("correo", especialista.getCorreo());
-
-            Map<String, Object> cuerpo = respuesta(true, "Autenticación satisfactoria");
-            cuerpo.put("idEspecialista", especialista.getIdEspecialista());
-            cuerpo.put("nombre", especialista.getNombre());
-            cuerpo.put("correo", especialista.getCorreo());
-            return ResponseEntity.ok(cuerpo);
-
-        } catch (SQLException e) {
-            System.err.println("Error en login: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(respuesta(false, "Error interno del servidor"));
-        }
-    }
-
-    /** POST /api/logout — destruye la sesión en el servidor. */
-    @PostMapping("/logout")
-    public ResponseEntity<Map<String, Object>> cerrarSesion(HttpSession sesion) {
-        sesion.invalidate();
-        return ResponseEntity.ok(respuesta(true, "Sesión cerrada correctamente"));
-    }
-
+    
     /** POST /api/especialistas — registra un nuevo especialista. */
     @PostMapping("/especialistas")
     public ResponseEntity<Map<String, Object>> registrarEspecialista(
