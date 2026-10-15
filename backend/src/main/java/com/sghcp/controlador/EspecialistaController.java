@@ -1,5 +1,6 @@
 package com.sghcp.controlador;
 
+import com.sghcp.config.Permisos;
 import com.sghcp.dao.EspecialistaDAO;
 import com.sghcp.modelo.Especialista;
 import jakarta.servlet.http.HttpSession;
@@ -14,9 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Servicios web de inicio de sesión, cierre de sesión y registro de especialistas.
- * Es la puerta de entrada de la API: recibe las peticiones (por ejemplo desde Postman
- * o React), delega en el DAO y responde siempre en JSON.
+ * Servicio web de registro de especialistas. Solo el administrador del sistema
+ * puede crear cuentas de especialistas.
  */
 @RestController
 @RequestMapping("/api")
@@ -28,8 +28,7 @@ public class EspecialistaController {
         this.especialistaDAO = especialistaDAO;
     }
 
-    
-    /** POST /api/especialistas — registra un nuevo especialista. */
+    /** POST /api/especialistas — registra un nuevo especialista (solo ADMIN). */
     @PostMapping("/especialistas")
     public ResponseEntity<Map<String, Object>> registrarEspecialista(
             @RequestParam(value = "Nombre", required = false) String nombre,
@@ -37,7 +36,18 @@ public class EspecialistaController {
             @RequestParam(value = "Tarjeta_Profesional", required = false) String tarjetaProfesional,
             @RequestParam(value = "Correo", required = false) String correo,
             @RequestParam(value = "Especialidad", required = false) String especialidad,
-            @RequestParam(value = "Telefono", required = false) String telefono) {
+            @RequestParam(value = "Telefono", required = false) String telefono,
+            HttpSession sesion) {
+
+        // Control de acceso: sin sesión -> 401; con sesión pero sin ser ADMIN -> 403
+        if (!Permisos.hayLogin(sesion)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(respuesta(false, "Debe iniciar sesión"));
+        }
+        if (!Permisos.tieneRol(sesion, Permisos.ADMIN)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(respuesta(false, "No tiene permisos para esta acción"));
+        }
 
         // Validación: los campos obligatorios no pueden llegar vacíos
         if (estaVacio(nombre) || estaVacio(apellidos)
@@ -75,13 +85,10 @@ public class EspecialistaController {
         }
     }
 
-    // ---- Métodos de apoyo ----
-
     private boolean estaVacio(String texto) {
         return texto == null || texto.isBlank();
     }
 
-    /** Construye el JSON base de respuesta: success + mensaje. */
     private Map<String, Object> respuesta(boolean exito, String mensaje) {
         Map<String, Object> cuerpo = new LinkedHashMap<>();
         cuerpo.put("success", exito);
