@@ -1,5 +1,9 @@
 package com.sghcp.controlador;
-
+import com.sghcp.dao.ClinicaDAO;
+import com.sghcp.modelo.Paciente;
+import com.sghcp.servicio.HistoriaPdfService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import com.sghcp.config.Permisos;
 import com.sghcp.dao.HistoriaClinicaDAO;
 import com.sghcp.dao.PacienteDAO;
@@ -36,14 +40,18 @@ public class HistoriaClinicaController {
     private static final String SOLO_AUTOR =
             "Solo el especialista que creó la historia clínica puede modificarla";
 
-    private final HistoriaClinicaDAO historiaDAO;
+        private final HistoriaClinicaDAO historiaDAO;
     private final PacienteDAO pacienteDAO;
+    private final ClinicaDAO clinicaDAO;
+    private final HistoriaPdfService pdfService;
 
-    public HistoriaClinicaController(HistoriaClinicaDAO historiaDAO, PacienteDAO pacienteDAO) {
+    public HistoriaClinicaController(HistoriaClinicaDAO historiaDAO, PacienteDAO pacienteDAO,
+                                     ClinicaDAO clinicaDAO, HistoriaPdfService pdfService) {
         this.historiaDAO = historiaDAO;
         this.pacienteDAO = pacienteDAO;
+        this.clinicaDAO = clinicaDAO;
+        this.pdfService = pdfService;
     }
-
     /** POST /api/pacientes/{idPaciente}/historias — crea una historia clínica (solo ESPECIALISTA). */
     @PostMapping("/pacientes/{idPaciente}/historias")
     public ResponseEntity<?> crear(
@@ -347,7 +355,37 @@ public class HistoriaClinicaController {
             return errorInterno("listar servicios", e);
         }
     }
+        /** GET /api/historias/{id}/pdf — descarga la historia clínica en PDF (ESPECIALISTA y AUXILIAR). */
+    @GetMapping("/historias/{id}/pdf")
+    public ResponseEntity<?> descargarPdf(@PathVariable int id, HttpSession sesion) {
 
+        ResponseEntity<?> acceso = verificarAcceso(sesion, Permisos.ESPECIALISTA, Permisos.AUXILIAR);
+        if (acceso != null) {
+            return acceso;
+        }
+        try {
+            HistoriaClinica historia = historiaDAO.buscarPorId(id);
+            if (historia == null) {
+                return error(HttpStatus.NOT_FOUND, "Historia clínica no encontrada");
+            }
+            Paciente paciente = pacienteDAO.buscarPorId(historia.getIdPaciente());
+            byte[] pdf = pdfService.generar(historia, paciente, clinicaDAO.obtener());
+
+            // "attachment" hace que el navegador o Postman lo traten como un archivo descargable
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"historia_clinica_" + id + ".pdf\"")
+                    .body(pdf);
+
+        } catch (SQLException e) {
+            return errorInterno("generar el PDF de la historia clínica", e);
+        } catch (IllegalStateException e) {
+            System.err.println("Error al armar el PDF: " + e.getMessage());
+            return error(HttpStatus.INTERNAL_SERVER_ERROR, "No se pudo generar el PDF");
+        }
+    }
+    
     // ---- Métodos de apoyo ----
 
     /** Devuelve null si el usuario puede continuar; 401 si no hay sesión; 403 si su rol no está permitido. */
