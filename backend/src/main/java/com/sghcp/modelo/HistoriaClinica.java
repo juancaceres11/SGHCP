@@ -50,4 +50,13 @@ public class HistoriaClinica {
     public void setIdentificacionPaciente(String identificacionPaciente) { this.identificacionPaciente = identificacionPaciente; }
     public String getNombreEspecialista() { return nombreEspecialista; }
     public void setNombreEspecialista(String nombreEspecialista) { this.nombreEspecialista = nombreEspecialista; }
+
+    // Fechas de cierre y de revocación del consentimiento (se llenan con los cambios de estado)
+    private String fechaCierre;
+    private String fechaRevocacion;
+
+    public String getFechaCierre() { return fechaCierre; }
+    public void setFechaCierre(String fechaCierre) { this.fechaCierre = fechaCierre; }
+    public String getFechaRevocacion() { return fechaRevocacion; }
+    public void setFechaRevocacion(String fechaRevocacion) { this.fechaRevocacion = fechaRevocacion; }
 }

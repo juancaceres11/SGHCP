@@ -28,13 +28,22 @@ public class HistoriaClinicaDAO {
         this.conexionBD = conexionBD;
     }
 
+    /** Asigna una fecha opcional: si viene null, guarda NULL en la base. */
+    private void asignarFecha(PreparedStatement ps, int posicion, String fecha) throws SQLException {
+        if (fecha != null) {
+            ps.setDate(posicion, Date.valueOf(fecha));
+        } else {
+            ps.setNull(posicion, Types.DATE);
+        }
+    }
+
     /** Inserta una historia clínica nueva. Devuelve el id generado, o -1 si no se pudo guardar. */
     public int crear(HistoriaClinica h) throws SQLException {
         String sql = "INSERT INTO historia_clinica "
                    + "(Motivo_Consulta, Antecedentes_Medicos, Diagnostico, Fecha_Consulta, Estado, "
                    + "Observaciones, Fecha_Firma, Tipo_Procedimiento, Estado_Consentimiento, "
-                   + "Id_Paciente, Id_Especialista) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                   + "Id_Paciente, Id_Especialista, Fecha_Cierre) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = conexionBD.getConexion();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, h.getMotivoConsulta());
@@ -43,15 +52,12 @@ public class HistoriaClinicaDAO {
             ps.setDate(4, Date.valueOf(h.getFechaConsulta()));
             ps.setString(5, h.getEstado());
             ps.setString(6, h.getObservaciones());
-            if (h.getFechaFirma() != null) {
-                ps.setDate(7, Date.valueOf(h.getFechaFirma()));
-            } else {
-                ps.setNull(7, Types.DATE);   // sin consentimiento firmado no hay fecha de firma
-            }
+            asignarFecha(ps, 7, h.getFechaFirma());   // solo si el consentimiento está firmado
             ps.setString(8, h.getTipoProcedimiento());
             ps.setString(9, h.getEstadoConsentimiento());
             ps.setInt(10, h.getIdPaciente());
             ps.setInt(11, h.getIdEspecialista());
+            asignarFecha(ps, 12, h.getFechaCierre()); // solo si nace ya cerrada
             ps.executeUpdate();
 
             try (ResultSet claves = ps.getGeneratedKeys()) {
@@ -94,6 +100,7 @@ public class HistoriaClinicaDAO {
         String sql = "SELECT h.Id_HistoriaClinica, h.Motivo_Consulta, h.Antecedentes_Medicos, "
                    + "h.Diagnostico, h.Fecha_Consulta, h.Estado, h.Observaciones, h.Fecha_Firma, "
                    + "h.Tipo_Procedimiento, h.Estado_Consentimiento, h.Id_Paciente, h.Id_Especialista, "
+                   + "h.Fecha_Cierre, h.Fecha_Revocacion, "
                    + "CONCAT(p.Nombre, ' ', p.Apellidos) AS Nombre_Paciente, "
                    + "p.Identificacion AS Identificacion_Paciente, "
                    + "CONCAT(e.Nombre, ' ', e.Apellidos) AS Nombre_Especialista "
@@ -119,6 +126,8 @@ public class HistoriaClinicaDAO {
                     h.setEstadoConsentimiento(rs.getString("Estado_Consentimiento"));
                     h.setIdPaciente(rs.getInt("Id_Paciente"));
                     h.setIdEspecialista(rs.getInt("Id_Especialista"));
+                    h.setFechaCierre(rs.getString("Fecha_Cierre"));
+                    h.setFechaRevocacion(rs.getString("Fecha_Revocacion"));
                     h.setNombrePaciente(rs.getString("Nombre_Paciente"));
                     h.setIdentificacionPaciente(rs.getString("Identificacion_Paciente"));
                     h.setNombreEspecialista(rs.getString("Nombre_Especialista"));
@@ -127,6 +136,58 @@ public class HistoriaClinicaDAO {
             }
         }
         return null;
+    }
+
+    /** Pasa una historia de Pendiente a Abierta. Devuelve false si ya no estaba Pendiente. */
+    public boolean abrir(int id) throws SQLException {
+        String sql = "UPDATE historia_clinica SET Estado = 'Abierta' "
+                   + "WHERE Id_HistoriaClinica = ? AND Estado = 'Pendiente'";
+        try (Connection conn = conexionBD.getConexion();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    /** Cierra una historia con su diagnóstico final y la fecha de cierre. Devuelve false si ya estaba cerrada. */
+    public boolean cerrar(int id, String diagnostico, String observaciones, String fechaCierre)
+            throws SQLException {
+        String sql = "UPDATE historia_clinica SET Estado = 'Cerrada', Diagnostico = ?, "
+                   + "Observaciones = ?, Fecha_Cierre = ? "
+                   + "WHERE Id_HistoriaClinica = ? AND Estado <> 'Cerrada'";
+        try (Connection conn = conexionBD.getConexion();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, diagnostico);
+            ps.setString(2, observaciones);
+            ps.setDate(3, Date.valueOf(fechaCierre));
+            ps.setInt(4, id);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    /** Registra la firma del consentimiento (solo si estaba No Firmado y la historia no está cerrada). */
+    public boolean firmar(int id, String fechaFirma) throws SQLException {
+        String sql = "UPDATE historia_clinica SET Estado_Consentimiento = 'Firmado', Fecha_Firma = ? "
+                   + "WHERE Id_HistoriaClinica = ? AND Estado_Consentimiento = 'No Firmado' "
+                   + "AND Estado <> 'Cerrada'";
+        try (Connection conn = conexionBD.getConexion();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(fechaFirma));
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    /** Revoca un consentimiento firmado. La fecha de firma original se conserva. */
+    public boolean revocar(int id, String fechaRevocacion) throws SQLException {
+        String sql = "UPDATE historia_clinica SET Estado_Consentimiento = 'Revocado', Fecha_Revocacion = ? "
+                   + "WHERE Id_HistoriaClinica = ? AND Estado_Consentimiento = 'Firmado'";
+        try (Connection conn = conexionBD.getConexion();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDate(1, Date.valueOf(fechaRevocacion));
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+        }
     }
 
     /** Servicios de la clínica: alimentan la lista desplegable de "Tipo de procedimiento". */
