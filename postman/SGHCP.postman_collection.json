@@ -8,86 +8,645 @@
   },
   "item": [
     {
-      "name": "Login - especialista",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "urlencoded",
-          "urlencoded": [
-            {
-              "key": "Correo",
-              "value": "isabel03@gmail.com"
+      "name": "Autenticación",
+      "item": [
+        {
+          "name": "Login - especialista",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "Correo",
+                  "value": "userejemplo@gmai.com"
+                },
+                {
+                  "key": "Clave",
+                  "value": "Contraseñaejemplo"
+                }
+              ]
             },
-            {
-              "key": "Tarjeta_Profesional",
-              "value": "tp3312"
+            "url": {
+              "raw": "http://localhost:8080/api/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "login"
+              ]
             }
-          ]
+          },
+          "response": []
         },
-        "url": {
-          "raw": "http://localhost:8080/sghcp_inicio_sesion/LoginServlet",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "8080",
-          "path": [
-            "sghcp_inicio_sesion",
-            "LoginServlet"
-          ]
+        {
+          "name": "Login - auxiliar",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "Correo",
+                  "value": "ejemplocontraseña"
+                },
+                {
+                  "key": "Clave",
+                  "value": "ejemplo123"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - admin",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "Correo",
+                  "value": "admin@gmail.com"
+                },
+                {
+                  "key": "Clave",
+                  "value": "contraseñaejemplo"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/logout",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": ": Sesión actual",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/sesion",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "sesion"
+              ]
+            }
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
     },
     {
-      "name": "Registro - especialista",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "urlencoded",
-          "urlencoded": [
-            {
-              "key": "Nombre",
-              "value": "isabel"
-            },
-            {
-              "key": "Apellidos",
-              "value": "acosta"
-            },
-            {
-              "key": "Tarjeta_Profesional",
-              "value": "tp3312"
-            },
-            {
-              "key": "Correo",
-              "value": "isabel03@gmail.com"
-            },
-            {
-              "key": "Especialidad",
-              "value": "podologia general"
-            },
-            {
-              "key": "Telefono",
-              "value": "3125678900"
+      "name": "Pacientes",
+      "item": [
+        {
+          "name": "Listar pacientes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/pacientes",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "pacientes"
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
             }
-          ]
+          },
+          "response": []
         },
-        "url": {
-          "raw": "http://localhost:8080/sghcp_inicio_sesion/RegistroEspecialistaServlet",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "8080",
-          "path": [
-            "sghcp_inicio_sesion",
-            "RegistroEspecialistaServlet"
-          ]
+        {
+          "name": "Buscar paciente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/pacientes?q=juan andres",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "pacientes"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "juan andres"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Perfil de paciente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/pacientes/2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "pacientes",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar paciente",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "Nombre",
+                  "value": "Laura vanesa"
+                },
+                {
+                  "key": "Apellidos",
+                  "value": "fernandez"
+                },
+                {
+                  "key": "Fecha_Nacimiento",
+                  "value": "2000-10-12"
+                },
+                {
+                  "key": "Tipo_Sangre",
+                  "value": "A+"
+                },
+                {
+                  "key": "Identificacion",
+                  "value": "1666789432"
+                },
+                {
+                  "key": "Sexo",
+                  "value": "F"
+                },
+                {
+                  "key": "Telefono",
+                  "value": ""
+                },
+                {
+                  "key": "Ocupacion",
+                  "value": "Operaria industrial"
+                },
+                {
+                  "key": "Direccion",
+                  "value": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/pacientes",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "pacientes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar paciente",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "Nombre",
+                  "value": "juan andres"
+                },
+                {
+                  "key": "Apellidos",
+                  "value": "obando castaÃ±eda"
+                },
+                {
+                  "key": "Fecha_Nacimiento",
+                  "value": "1988-12-11"
+                },
+                {
+                  "key": "Tipo_Sangre",
+                  "value": "A+"
+                },
+                {
+                  "key": "Identificacion",
+                  "value": "1003456788"
+                },
+                {
+                  "key": "Sexo",
+                  "value": "M"
+                },
+                {
+                  "key": "Telefono",
+                  "value": "3204567432"
+                },
+                {
+                  "key": "Ocupacion",
+                  "value": "entrenador futsal"
+                },
+                {
+                  "key": "Direccion",
+                  "value": "pereira, calle 12 #12-34"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/pacientes/3",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "pacientes",
+                "3"
+              ]
+            }
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
+    },
+    {
+      "name": "Especialistas",
+      "item": [
+        {
+          "name": "Registro - especialista",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "Nombre",
+                  "value": "juliana"
+                },
+                {
+                  "key": "Apellidos",
+                  "value": "escobar "
+                },
+                {
+                  "key": "Tarjeta_Profesional",
+                  "value": "ejemplocontraseña"
+                },
+                {
+                  "key": "Correo",
+                  "value": "especialista@gmail.com"
+                },
+                {
+                  "key": "Especialidad",
+                  "value": "podologia infatil"
+                },
+                {
+                  "key": "Telefono",
+                  "value": "3213245634"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/especialistas",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "especialistas"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Historias clínicas",
+      "item": [
+        {
+          "name": "Servicios de la Clínica",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/servicios",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "servicios"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Historia Clínica",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "Motivo_Consulta",
+                  "value": "dolor en el talon derecho"
+                },
+                {
+                  "key": "Antecedentes_Medicos",
+                  "value": "niega"
+                },
+                {
+                  "key": "Diagnostico",
+                  "value": "callos grado 1"
+                },
+                {
+                  "key": "Tipo_Procedimiento",
+                  "value": "quirugico y anestesico"
+                },
+                {
+                  "key": "Estado",
+                  "value": "Abierta"
+                },
+                {
+                  "key": "Observaciones",
+                  "value": "Se recomienda reposo y tomar medicamentos correctamente"
+                },
+                {
+                  "key": "Estado_Consentimiento",
+                  "value": "No Firmado"
+                },
+                {
+                  "key": "Fecha_Firma",
+                  "value": "2026-10-20"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/pacientes/18/historias",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "pacientes",
+                "18",
+                "historias"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Historial paciente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/pacientes/2/historias",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "pacientes",
+                "2",
+                "historias"
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Detalle de Historia clínica",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/historias/2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "historias",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cambiar estado de historia",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "Estado",
+                  "value": "Abierta"
+                },
+                {
+                  "key": "Diagnostico",
+                  "value": "Unicocriptosis grado 1",
+                  "disabled": true
+                },
+                {
+                  "key": "Observaciones",
+                  "value": "paciente termina tratamiento exitosamente",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/historias/2/estado",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "historias",
+                "2",
+                "estado"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cambiar estado del consentimiento",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "Estado_Consentimiento",
+                  "value": "Firmado"
+                },
+                {
+                  "key": "Fecha_Firma",
+                  "value": "2026-10-20"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/historias/2/consentimiento",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "historias",
+                "2",
+                "consentimiento"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Descargar PDF de historia clinica",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/historias/10/pdf",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "historias",
+                "10",
+                "pdf"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }
